@@ -1,0 +1,181 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 25.04.0-DevelopmentSnapshot ] */
+/* [wxMaxima: comment start ]
+/* vim: set filetype=maxima ai et ts=4 sw=4 tw=67: */
+   [wxMaxima: comment end   ] */
+
+
+/* [wxMaxima: input   start ] */
+qput(hep_units, "experimental, usable", version);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+if get('physical_constants, 'version) = false
+then
+    load("physical_constants")
+else
+    'already_loaded;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+declare(hep_unit, feature);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+declare_units(eV, qty(constvalue(%%e))*1`J)$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* define fundamental conversion between eV and Joule */
+declare_unit_conversion(1`eV = qty(constvalue(%%e))`J);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* define eV prefix conversions */
+declare_unit_conversion(
+    1`meV = 10^(-3)`eV,
+    1`keV = 10^3`eV,
+    1`MeV = 10^6`eV,
+    1`GeV = 10^9`eV,
+    1`TeV = 10^12`eV,
+    1`PeV = 10^15`eV,
+    1`EeV = 10^18`eV,
+    1`ZeV = 10^21`eV
+);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*
+ * ----------------------------------------------------------------
+ * Convert dimensionful quantity `q` to natural units with `GeV` as
+ * the base energy unit. Units of `q` must be in or convertible to
+ * SI
+ * ----------------------------------------------------------------
+ */
+hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
+    dims: dimensions_as_list(q),    
+    /*
+      define dimension powers consistent with:
+      Alan L. Myers, Natural System of Units in General Relativity
+    */
+    beta: dims[1], alpha: dims[2], gamma: dims[3],
+    /*
+      Dimension of any quantity may be re-written as:
+      (Energy)^(a - b - g) * ħ^(b + g) * c^(b - 2*a)
+    */
+    convfac: %h_bar^(beta + gamma) * %c^(beta - 2*alpha),
+    return(
+        qty(
+            (q``fundamental_units(q)) / constvalue(convfac)
+        ) * (1`J``GeV)^(alpha - beta - gamma)
+    )
+)$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/*
+ * ----------------------------------------------------------------
+ * Convert quantity `q` in HEP natural units (powers of GeV) to SI
+ * unit `u`. If dimensions of `q` and `u` do not match, an error is
+ * thrown and process aborted
+ * ----------------------------------------------------------------
+ */
+si(q, u) := block(local(dims, alpha, beta, gamma, gev_conv),
+    /*
+      natural units have ℏ and c set to 1, so get the
+      correct dimensions from desired si units instead
+    */
+    dims: dimensions_as_list(1`u),
+    /*
+      define dimension powers consistent with:
+      Alan L. Myers, Natural System of Units in General Relativity
+    */
+    beta: dims[1], alpha: dims[2], gamma: dims[3],
+    /*
+      conversion factor of (Multiplier*GeV)^(a - b - g) to
+      GeV^(a - b - g);
+      for example:
+        # 1 PeV² -> 1 GeV² => gev_conv = (1.0E06)^2;
+        # 2 TeV -> 1 GeV => gev_conv = 2000;
+      and so on
+    */
+    gev_conv: q``GeV^(alpha - beta - gamma),
+    /*
+      if `gev_conv` does not have Energy^(a - b - g) units, it ends
+      up in a weird state with dimensions pushed into the `qty`
+      itself; we can check if `qty(gev_conv)` is dimensionless,
+      return converted result if so, and throw error if not
+    */
+    if dimensions(qty(gev_conv)) = 1
+    then
+        return(
+            qty(gev_conv) / qty(hep_natural(1`u))`u
+        )
+    else
+        error(
+            printf(
+                false,
+                "mismatched dimensions when converting ~a to ~a",
+                units(q), u
+            )
+        )
+)$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* Pre-defined variables for use as conversion factors */
+InvGeV_to_s: si(1`GeV^(-1), s)$
+s_to_InvGeV: hep_natural(1`s) $
+InvGeV_to_m: si(1`GeV^(-1), m)$
+m_to_InvGeV: hep_natural(1`m) $ 
+GeV_to_kg  : si(1`GeV, kg)    $
+kg_to_GeV  : hep_natural(1`kg)$
+GeV_to_J   : si(1`GeV, J)     $
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: comment start ]
+/*
+ * ===================
+ * Cross-section units
+ * ===================
+ */
+   [wxMaxima: comment end   ] */
+
+
+/* [wxMaxima: input   start ] */
+declare_units(b, 100`fm^2);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+declare_unit_conversion(
+    1`b   = 100`fm^2,
+    1`mb  = 10^(-3)`b,
+    1`mub = 10^(-3)`mb,
+    1`nb  = 10^(-3)`mub,
+    1`pb  = 10^(-3)`nb,
+    1`fb  = 10^(-3)`pb,
+    1`ab  = 10^(-3)`fb
+);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* Predefined conversions for quick-access */
+InvGeV2_to_mb: si(1`GeV^(-2), mb)$
+mb_to_InvGeV2: hep_natural(1`mb) $
+/* [wxMaxima: input   end   ] */
+
+
+
+/* Old versions of Maxima abort on loading files that end in a comment. */
+"Created with wxMaxima 25.04.0-DevelopmentSnapshot"$
