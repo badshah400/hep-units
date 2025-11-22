@@ -198,7 +198,7 @@ declare_constvalue(
 /* PDG value: 0.3894 GeV² mb */
 declare_constvalue(
     %hbar_c_sqr,
-    constvalue(%hbar_c)²``(GeV²*mb)
+    constvalue(%hbar_c)^2``((GeV^2)*mb)
 )$
 /* [wxMaxima: input   end   ] */
 
