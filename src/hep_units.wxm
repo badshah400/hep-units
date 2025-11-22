@@ -51,8 +51,7 @@ declare_unit_conversion(
 
 
 /* [wxMaxima: input   start ] */
-/*
- * ----------------------------------------------------------------
+/* ----------------------------------------------------------------
  * Convert dimensionful quantity `q` to natural units with `GeV` as
  * the base energy unit. Units of `q` must be in or convertible to
  * SI
@@ -80,8 +79,7 @@ hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
 
 
 /* [wxMaxima: input   start ] */
-/*
- * ----------------------------------------------------------------
+/* ----------------------------------------------------------------
  * Convert quantity `q` in HEP natural units (powers of GeV) to SI
  * unit `u`. If dimensions of `q` and `u` do not match, an error is
  * thrown and process aborted
@@ -169,10 +167,39 @@ declare_unit_conversion(
 /* [wxMaxima: input   end   ] */
 
 
+/* [wxMaxima: comment start ]
+/* Predefined conversion factors for quick-access
+ *
+ * c.f.: S. Navas et al. (Particle Data Group), Phys. Rev. D 110,
+ * 030001 (2024) and 2025 update
+ */
+   [wxMaxima: comment end   ] */
+
+
 /* [wxMaxima: input   start ] */
-/* Predefined conversions for quick-access */
 InvGeV2_to_mb: si(1`GeV^(-2), mb)$
 mb_to_InvGeV2: hep_natural(1`mb) $
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* PDG value: 197.3 MeV fm */
+declare_constvalue(
+    %hbar_c,
+    (
+        (hep_natural(constvalue(%h_bar/(1`s)))``MeV)
+        * (constvalue(%c*1`s)``fm)
+    )
+)$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* PDG value: 0.3894 GeV² mb */
+declare_constvalue(
+    %hbar_c_sqr,
+    constvalue(%hbar_c)²``(GeV²*mb)
+)$
 /* [wxMaxima: input   end   ] */
 
 
