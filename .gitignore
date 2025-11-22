@@ -1,0 +1,7 @@
+# meson build artefacts
+meson-info
+meson-logs
+meson-private
+build.ninja
+compile_commands.json
+
