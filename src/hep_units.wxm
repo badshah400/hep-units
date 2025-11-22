@@ -51,6 +51,11 @@ declare_unit_conversion(
 
 
 /* [wxMaxima: input   start ] */
+hep_natural_base: GeV$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
 /* ----------------------------------------------------------------
  * Convert dimensionful quantity `q` to natural units with `GeV` as
  * the base energy unit. Units of `q` must be in or convertible to
@@ -58,6 +63,10 @@ declare_unit_conversion(
  * ----------------------------------------------------------------
  */
 hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
+    if dimensions(hep_natural_base) # dimensions(J)
+    then
+        error("`hep_natural_base` not set to energy units"),
+
     dims: dimensions_as_list(q),    
     /*
       define dimension powers consistent with:
@@ -72,7 +81,7 @@ hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
     return(
         qty(
             (q``fundamental_units(q)) / constvalue(convfac)
-        ) * (1`J``GeV)^(alpha - beta - gamma)
+        ) * (1`J``hep_natural_base)^(alpha - beta - gamma)
     )
 )$
 /* [wxMaxima: input   end   ] */
@@ -85,7 +94,10 @@ hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
  * thrown and process aborted
  * ----------------------------------------------------------------
  */
-si(q, u) := block(local(dims, alpha, beta, gamma, gev_conv),
+si(q, u) := block(local(dims, alpha, beta, gamma, base_conv),
+    if dimensions(hep_natural_base) # dimensions(J)
+    then
+        error("`hep_natural_base` not set to energy units"),
     /*
       natural units have ℏ and c set to 1, so get the
       correct dimensions from desired si units instead
@@ -100,21 +112,21 @@ si(q, u) := block(local(dims, alpha, beta, gamma, gev_conv),
       conversion factor of (Multiplier*GeV)^(a - b - g) to
       GeV^(a - b - g);
       for example:
-        # 1 PeV² -> 1 GeV² => gev_conv = (1.0E06)^2;
-        # 2 TeV -> 1 GeV => gev_conv = 2000;
+        # 1 PeV² -> 1 GeV² => base_conv = (1.0E06)^2;
+        # 2 TeV -> 1 GeV => base_conv = 2000;
       and so on
     */
-    gev_conv: q``GeV^(alpha - beta - gamma),
+    base_conv: q``hep_natural_base^(alpha - beta - gamma),
     /*
-      if `gev_conv` does not have Energy^(a - b - g) units, it ends
+      if `base_conv` does not have Energy^(a - b - g) units, it ends
       up in a weird state with dimensions pushed into the `qty`
-      itself; we can check if `qty(gev_conv)` is dimensionless,
+      itself; we can check if `qty(base_conv)` is dimensionless,
       return converted result if so, and throw error if not
     */
-    if dimensions(qty(gev_conv)) = 1
+    if dimensions(qty(base_conv)) = 1
     then
         return(
-            qty(gev_conv) / qty(hep_natural(1`u))`u
+            qty(base_conv) / qty(hep_natural(1`u))`u
         )
     else
         error(
