@@ -62,7 +62,8 @@ hep_natural_base: GeV$
  * SI
  * ----------------------------------------------------------------
  */
-hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
+hep_natural(q) := block(
+    local(dims, _a, _b, _g, convfac),
     if dimensions(hep_natural_base) # dimensions(J)
     then
         error("`hep_natural_base` not set to energy units"),
@@ -72,16 +73,16 @@ hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
       define dimension powers consistent with:
       Alan L. Myers, Natural System of Units in General Relativity
     */
-    beta: dims[1], alpha: dims[2], gamma: dims[3],
+    _b: dims[1], _a: dims[2], _g: dims[3],
     /*
       Dimension of any quantity may be re-written as:
       (Energy)^(a - b - g) * ħ^(b + g) * c^(b - 2*a)
     */
-    convfac: %h_bar^(beta + gamma) * %c^(beta - 2*alpha),
+    convfac: %h_bar^(_b + _a) * %c^(_b - 2*_a),
     return(
         qty(
             (q``fundamental_units(q)) / constvalue(convfac)
-        ) * (1`J``hep_natural_base)^(alpha - beta - gamma)
+        ) * (1`J``hep_natural_base)^(_a - _b - _g)
     )
 )$
 /* [wxMaxima: input   end   ] */
@@ -94,7 +95,7 @@ hep_natural(q) := block(local(dims, alpha, beta, gamma, convfac),
  * thrown and process aborted
  * ----------------------------------------------------------------
  */
-si(q, u) := block(local(dims, alpha, beta, gamma, base_conv),
+si(q, u) := block(local(dims, _a, _b, _g, base_conv),
     if dimensions(hep_natural_base) # dimensions(J)
     then
         error("`hep_natural_base` not set to energy units"),
@@ -107,7 +108,7 @@ si(q, u) := block(local(dims, alpha, beta, gamma, base_conv),
       define dimension powers consistent with:
       Alan L. Myers, Natural System of Units in General Relativity
     */
-    beta: dims[1], alpha: dims[2], gamma: dims[3],
+    _b: dims[1], _a: dims[2], _g: dims[3],
     /*
       conversion factor of (Multiplier*GeV)^(a - b - g) to
       GeV^(a - b - g);
@@ -116,7 +117,7 @@ si(q, u) := block(local(dims, alpha, beta, gamma, base_conv),
         # 2 TeV -> 1 GeV => base_conv = 2000;
       and so on
     */
-    base_conv: q``hep_natural_base^(alpha - beta - gamma),
+    base_conv: q``hep_natural_base^(_a - _b - _g),
     /*
       if `base_conv` does not have Energy^(a - b - g) units, it ends
       up in a weird state with dimensions pushed into the `qty`
