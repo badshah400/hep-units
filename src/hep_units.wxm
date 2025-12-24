@@ -78,7 +78,7 @@ hep_natural(q) := block(
       Dimension of any quantity may be re-written as:
       (Energy)^(a - b - g) * ħ^(b + g) * c^(b - 2*a)
     */
-    convfac: %h_bar^(_b + _a) * %c^(_b - 2*_a),
+    convfac: %h_bar^(_b + _g) * %c^(_b - 2*_a),
     return(
         qty(
             (q``fundamental_units(q)) / constvalue(convfac)
